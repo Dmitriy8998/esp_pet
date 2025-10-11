@@ -1,23 +1,39 @@
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import LedStick from "./pages/LedStick";
+import Layout from './components/Layout/Layout';
+import SmartLamp from './pages/SmartLamp';
+import DeviceEmpty from './pages/DeviceEmpty';
+
 export default function App() {
 
-
-   const fetchData = async () => {
-   
-    try {
-      const res = await fetch('http://localhost:5000/', {method: 'GET'})
-      
-      const data = await res.json();
-      console.log("ESP___", data)
-
-    } catch (err) {
-      console.error(err)
+  const router = createBrowserRouter([
+    {
+      path: '/',
+      element: <Layout/>,
+      children: [
+    {
+      path: '/stick',
+      element: (
+        <LedStick/>
+      ),
+    },
+    {
+      path: '/lamp',
+      element: (
+        <SmartLamp/>
+      ),
+    },
+    {
+      path: '/empty',
+      element: (
+        <DeviceEmpty/>
+      ),
+    },
+      ]
     }
-  }
+]);
 
   return (
-    <div>
-      <h1>ESP</h1>
-      <button onClick={fetchData}>ESP_8266_fetch</button>
-    </div>
+  <RouterProvider router={router}/>
   )
 }
