@@ -1,7 +1,6 @@
 import { Box, Typography } from "@mui/material";
 
 export default function LedStick() {
-
     const fetchData = async () => {
         try {
         const res = await fetch('http://localhost:5000/', {method: 'GET'})
@@ -13,7 +12,7 @@ export default function LedStick() {
         console.error(err)
         }
     }
-
+    
     return(
         <Box component="div">
             <Box component="div" sx={{ display: 'flex', justifyContent: 'center' }}>

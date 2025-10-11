@@ -13,7 +13,6 @@ export default function MenuAppBar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState<boolean>(false)
 
-
   const toggleDrawer = (newOpen: boolean) => {
     setOpen(newOpen)
   }
@@ -44,7 +43,7 @@ export default function MenuAppBar() {
         </Toolbar>
       </AppBar>
       
-       <Drawer
+      <Drawer
         anchor="left"
         open={open}
         onClose={() => {toggleDrawer(false)}}
@@ -79,7 +78,7 @@ export default function MenuAppBar() {
           </List>
         </Box>
       </Drawer>
-
+      
     </Box>
   );
 }
