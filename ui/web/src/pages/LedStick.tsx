@@ -1,27 +1,53 @@
 import { Box, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import { ChromePicker, type ColorResult } from 'react-color'
 
 export default function LedStick() {
-    const fetchData = async () => {
-        try {
-        const res = await fetch('http://localhost:5000/', {method: 'GET'})
-        
-        const data = await res.json();
-        console.log("ESP___", data)
+    const [background, setBackground] = useState<string>("#fff")
 
-        } catch (err) {
-        console.error(err)
+    useEffect(() => {
+        const colorLed = async () => {
+            try {
+                await fetch('http://192.168.0.120/color', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: background
+                });
+            } catch (err) {
+                console.error(err)
+            }
         }
-    }
+        
+        colorLed()
+    }, [background])
     
+    const handleChangeComplete = (color: ColorResult) => {setBackground(color.hex)}
+
     return(
         <Box component="div">
             <Box component="div" sx={{ display: 'flex', justifyContent: 'center' }}>
-                <Typography fontSize={36}>
-                    LED stick
+                <Typography variant="h3">
+                    LED staff
                 </Typography>
             </Box>
             <Box component="div" sx={{ display: 'flex' }}>
-                <button onClick={fetchData}>ESP_8266_fetch</button>
+            </Box>
+            <Box component="div" sx={{ display: 'flex' }} >
+                <ChromePicker 
+                    styles={{
+                        default: {
+                            picker: {
+                                width: '500px',
+                                height: '500px',
+                            },
+                            controls: {
+                                fontSize: '20px'
+                            }
+                        }
+                    }}
+                    color={background}
+                    onChange={handleChangeComplete}
+                />
             </Box>
         </Box>
     )
