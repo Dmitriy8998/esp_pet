@@ -1,57 +1,87 @@
-//esp8266-07
-
-#include <Arduino.h>
-
 #include <ESP8266WiFi.h>
-#include <ESP8266WiFiMulti.h>
-#include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
+#include <ESP8266WebServer.h>
+#include <ESP8266mDNS.h>
 
-#define HOST_IP "192.168.0.58:5000" //temporrary IP
-#define ssid "empty"
-#define password "empty"
+#include <Adafruit_NeoPixel.h>
 
-#define LED_12 12
+#define STASSID "empty"
+#define STAPSK "empty"
 
-ESP8266WiFiMulti WiFiMulti;
+#define PIN_WS2812B   4
+#define LED_12        12
 
-void setup() {
-  Serial.begin(115200);
-  
-  pinMode(LED_12, OUTPUT);
+#define NUM_PIXELS    3
 
-  WiFi.mode(WIFI_STA);
-  WiFiMulti.addAP(ssid, password);
+const char* ssid = STASSID;
+const char* password = STAPSK;
 
-  while (WiFiMulti.run()!= WL_CONNECTED) {
-    Serial.println("CONNECTED...");
+String hexColor = "#000000";
+int R = 0;
+int B = 0;
+int G = 0;
 
-    delay(1000);
-  }
+ESP8266WebServer server(80);
+Adafruit_NeoPixel WS2812B(NUM_PIXELS, PIN_WS2812B, NEO_GRB + NEO_KHZ800);
 
-  Serial.println("CONNECTION SUCCEED");
-  Serial.print("esp_ip_");
-  Serial.println(WiFi.localIP());
+void sendCORSHeaders() {
+  server.sendHeader("Access-Control-Allow-Origin", "*");
+  server.sendHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  server.sendHeader("Access-Control-Allow-Headers", "*");
 }
 
-void loop() {
-  digitalWrite(LED_12, LOW);
-  delay(1000);
-  digitalWrite(LED_12, HIGH);
-  delay(1000);
+void handlePlain() {
+  sendCORSHeaders();
 
-  WiFiClient client;
-  HTTPClient http;
+  if (server.method() == HTTP_POST) {
+    digitalWrite(LED_12, HIGH);
+    
+    server.send(200, "text/plain", "Success");
+    
+    hexColor = server.arg("plain");
+    String hex = hexColor.substring(1);
+   
+    String r = hex.substring(0, 2);
+    String g = hex.substring(2, 4);
+    String b = hex.substring(4, 6);
+    R = strtol(r.c_str(), NULL, 16);
+    G = strtol(g.c_str(), NULL, 16);
+    B = strtol(b.c_str(), NULL, 16);
+    
+    digitalWrite(LED_12, LOW);
+  } else {
+    server.send(405, "text/plain", "Error");
+  }
+}
 
-  //  POST request on HOST
-  http.begin(client, "http://" HOST_IP "/esp/");
-  http.addHeader("Content-Type", "application/json");
-  int httpCode = http.POST("{\"hello\":\"world\"}");
+void setup(void) {
+  Serial.begin(115200);
+  WS2812B.begin();
+  
+  pinMode(LED_12, OUTPUT);
+  
+  WiFi.config(IPAddress(192,168,0,120), IPAddress(192,168,0,1), IPAddress(255,255,255,0));
+  WiFi.begin(ssid, password);
 
-  Serial.print("request status: ");
-  Serial.println(httpCode);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+  
+  Serial.println("\nConnected. IP address device: " + WiFi.localIP().toString());
 
-  http.end();
+  server.on("/color", HTTP_POST, handlePlain);
 
-  delay(1000);
+  server.begin();
+}
+
+void loop(void) {
+  server.handleClient();
+  
+  for (int pixel = 0; pixel < NUM_PIXELS; pixel++) {
+    WS2812B.setPixelColor(pixel, WS2812B.Color(R, G, B));
+    WS2812B.show();
+  }
+
+  WS2812B.show();
 }
