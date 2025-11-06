@@ -54,6 +54,20 @@ void handlePlain() {
   }
 }
 
+void onOff() {
+  sendCORSHeaders();
+
+  if (server.method() == HTTP_POST) {
+    server.send(200, "text/plain", "Success");
+
+    String text = server.arg("plain");
+    Serial.println(text);
+    R = 0; G = 0; B = 0;
+  } else {
+    server.send(405, "text/plain", "Error");
+  }
+}
+
 void setup(void) {
   Serial.begin(115200);
   WS2812B.begin();
@@ -71,6 +85,7 @@ void setup(void) {
   Serial.println("\nConnected. IP address device: " + WiFi.localIP().toString());
 
   server.on("/color", HTTP_POST, handlePlain);
+  server.on("/onOff", HTTP_POST, onOff);
 
   server.begin();
 }
