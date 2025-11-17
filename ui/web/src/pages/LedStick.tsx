@@ -1,9 +1,12 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { ChromePicker, type ColorResult } from 'react-color'
 
 export default function LedStick() {
-    const [background, setBackground] = useState<string>("#fff")
+    const [background, setBackground] = useState<string>("#0000")
+
+    const [isDisabled, setIsDisabled] = useState<number>(0.3)
+    const [stateOnOff, setStateOnOff] = useState<string>("ON")
 
     useEffect(() => {
         const colorLed = async () => {
@@ -11,15 +14,41 @@ export default function LedStick() {
                 await fetch('http://192.168.0.120/color', {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain' },
-                    body: background
+                    body: background,
                 });
             } catch (err) {
                 console.error(err)
-            }
-        }
+            };
+        };
         
         colorLed()
     }, [background])
+
+    const onOff = async () => {
+        try {
+            await fetch('http://192.168.0.120/onOff', {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: stateOnOff,
+            });
+        } catch (err) {
+            console.error(err)
+        };
+    };
+    
+    const handleClick = () => {
+        if(isDisabled === 0.3) {
+            setIsDisabled(1)
+            setStateOnOff("OFF")
+
+            onOff()
+        } else {
+            setIsDisabled(0.3)
+            setStateOnOff("ON")
+            
+            onOff()
+        }
+    }
     
     const handleChangeComplete = (color: ColorResult) => {setBackground(color.hex)}
 
@@ -31,8 +60,11 @@ export default function LedStick() {
                 </Typography>
             </Box>
             <Box component="div" sx={{ display: 'flex' }}>
+                <Button onClick={handleClick}>
+                    {stateOnOff}
+                </Button>
             </Box>
-            <Box component="div" sx={{ display: 'flex' }} >
+            <Box component="div" sx={{ display: 'flex', pointerEvents: stateOnOff === "OFF" ? 'auto' : 'none', opacity: isDisabled}} >
                 <ChromePicker 
                     styles={{
                         default: {
