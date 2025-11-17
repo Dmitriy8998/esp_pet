@@ -1,6 +1,8 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { ChromePicker, type ColorResult } from 'react-color'
+import MusicPlayerSlider from "../components/Player/Player";
+
 
 export default function LedStick() {
     const [background, setBackground] = useState<string>("#0000")
@@ -80,6 +82,9 @@ export default function LedStick() {
                     color={background}
                     onChange={handleChangeComplete}
                 />
+            </Box>
+            <Box component="div" sx={{ display: 'flex' }}>
+                <MusicPlayerSlider/>
             </Box>
         </Box>
     )
