@@ -2,6 +2,7 @@ import { Box, Button, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { ChromePicker, type ColorResult } from 'react-color'
 import MusicPlayerSlider from "../components/Player/Player";
+import Stream from "../components/Stream/Stream";
 
 
 export default function LedStick() {
@@ -66,22 +67,27 @@ export default function LedStick() {
                     {stateOnOff}
                 </Button>
             </Box>
-            <Box component="div" sx={{ display: 'flex', pointerEvents: stateOnOff === "OFF" ? 'auto' : 'none', opacity: isDisabled}} >
-                <ChromePicker 
-                    styles={{
-                        default: {
-                            picker: {
-                                width: '500px',
-                                height: '500px',
-                            },
-                            controls: {
-                                fontSize: '20px'
+            <Box component="div" sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                <Box component="div" sx={{ display: 'flex', pointerEvents: stateOnOff === "OFF" ? 'auto' : 'none', opacity: isDisabled}} >
+                    <ChromePicker 
+                        styles={{
+                            default: {
+                                picker: {
+                                    width: '500px',
+                                    height: '500px',
+                                },
+                                controls: {
+                                    fontSize: '20px'
+                                }
                             }
-                        }
-                    }}
-                    color={background}
-                    onChange={handleChangeComplete}
-                />
+                        }}
+                        color={background}
+                        onChange={handleChangeComplete}
+                    />
+                </Box>
+                <Box component="div" sx={{ display: 'flex' }}>
+                    <Stream/>
+                </Box>
             </Box>
             <Box component="div" sx={{ display: 'flex' }}>
                 <MusicPlayerSlider/>

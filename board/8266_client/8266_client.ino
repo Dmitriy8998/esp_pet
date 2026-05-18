@@ -1,16 +1,22 @@
+#include <Arduino.h>
+
 #include <ESP8266WiFi.h>
+#include <ESP8266WiFiMulti.h>
+
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
-
 #include <Adafruit_NeoPixel.h>
+
+#include <WebSocketsServer.h>
+#include <Hash.h>
+
 
 #define STASSID "empty"
 #define STAPSK "empty"
 
 #define PIN_WS2812B   4
 #define LED_12        12
-
 #define NUM_PIXELS    3
 
 const char* ssid = STASSID;
@@ -23,6 +29,29 @@ int G = 0;
 
 ESP8266WebServer server(80);
 Adafruit_NeoPixel WS2812B(NUM_PIXELS, PIN_WS2812B, NEO_GRB + NEO_KHZ800);
+
+WebSocketsServer webSocket = WebSocketsServer(81);
+
+
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
+ if (type == WStype_BIN) {
+   for(size_t i = 0; i < (length > 5 ? 5 : length); i++) {
+     Serial.print(payload[i]);
+   }
+   Serial.println();
+ 
+   if (!mp3->isRunning()) {
+     mp3->begin(audioBuffer, out);
+   }
+ }
+ 
+ else if (type == WStype_CONNECTED) {
+   Serial.printf("[%u] React is connect\n", num);
+ } 
+ else if (type == WStype_DISCONNECTED) {
+   Serial.printf("[%u] React disconnect\n", num);
+ }
+}
 
 void sendCORSHeaders() {
   server.sendHeader("Access-Control-Allow-Origin", "*");
@@ -88,10 +117,14 @@ void setup(void) {
   server.on("/onOff", HTTP_POST, onOff);
 
   server.begin();
+
+  webSocket.begin();
+  webSocket.onEvent(webSocketEvent);
 }
 
 void loop(void) {
   server.handleClient();
+  webSocket.loop();
   
   for (int pixel = 0; pixel < NUM_PIXELS; pixel++) {
     WS2812B.setPixelColor(pixel, WS2812B.Color(R, G, B));

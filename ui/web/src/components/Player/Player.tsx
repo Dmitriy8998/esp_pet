@@ -11,7 +11,7 @@ import FastForwardRounded from '@mui/icons-material/FastForwardRounded';
 import FastRewindRounded from '@mui/icons-material/FastRewindRounded';
 import VolumeUpRounded from '@mui/icons-material/VolumeUpRounded';
 import VolumeDownRounded from '@mui/icons-material/VolumeDownRounded';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 const WallPaper = styled('div')({
   position: 'absolute',
@@ -81,6 +81,23 @@ const CoverImage = styled('div')({
 // });
 
 export default function MusicPlayerSlider() {
+
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+
+  const togglePlay = () => {
+        if (!audioRef.current) return
+
+        if (audioRef.current.paused) {
+            audioRef.current.play();
+            // setIsPlaying(true);
+            setPaused(true)
+        } else {
+            audioRef.current.pause();
+            // setIsPlaying(false);
+            setPaused(false)
+        }
+    };
+
 //   const duration = 200; // seconds
 //   const [position, setPosition] = useState(32);
   const [paused, setPaused] = useState(false);
@@ -96,8 +113,9 @@ export default function MusicPlayerSlider() {
           <CoverImage>
             {/* <img
               alt="text in place of the image"
-              src="/path to the .jpg image file"
+              src="/music.mp3"
             /> */}
+            <audio ref={audioRef} src='/music.mp3' preload="auto" />
           </CoverImage>
         </Box>
         <Slider
@@ -111,31 +129,7 @@ export default function MusicPlayerSlider() {
           sx={() => ({
             color: 'rgba(0,0,0,0.87)',
             height: 4,
-            // For a beautiful slider display
-            // '& .MuiSlider-thumb': {
-            //   width: 8,
-            //   height: 8,
-            //   transition: '0.3s cubic-bezier(.47,1.64,.41,.8)',
-            //   '&::before': {
-            //     boxShadow: '0 2px 12px 0 rgba(0,0,0,0.4)',
-            //   },
-            //   '&:hover, &.Mui-focusVisible': {
-            //     boxShadow: `0px 0px 0px 8px ${'rgb(0 0 0 / 16%)'}`,
-            //     ...t.applyStyles('dark', {
-            //       boxShadow: `0px 0px 0px 8px ${'rgb(255 255 255 / 16%)'}`,
-            //     }),
-            //   },
-            //   '&.Mui-active': {
-            //     width: 20,
-            //     height: 20,
-            //   },
-            // },
-            // '& .MuiSlider-rail': {
-            //   opacity: 0.28,
-            // },
-            // ...t.applyStyles('dark', {
-            //   color: '#ffffffff',
-            // }),
+           
           })}
         />
         <Box
@@ -158,9 +152,9 @@ export default function MusicPlayerSlider() {
           </IconButton>
           <IconButton
             aria-label={paused ? 'play' : 'pause'}
-            onClick={() => setPaused(!paused)}
+            onClick={() => togglePlay()}
           >
-            {paused ? (
+            {!paused ? (
               <PlayArrowRounded sx={{ fontSize: '3rem', color: '#000' }} />
             ) : (
               <PauseRounded sx={{ fontSize: '3rem', color: '#000' }} />
@@ -192,23 +186,6 @@ export default function MusicPlayerSlider() {
             defaultValue={30}
             sx={() => ({
               color: 'rgba(0,0,0,0.87)',
-            //   '& .MuiSlider-track': {
-            //     border: 'none',
-            //   },
-            //   '& .MuiSlider-thumb': {
-            //     width: 24,
-            //     height: 24,
-            //     backgroundColor: '#fff',
-            //     '&::before': {
-            //       boxShadow: '0 4px 8px rgba(0,0,0,0.4)',
-            //     },
-            //     '&:hover, &.Mui-focusVisible, &.Mui-active': {
-            //       boxShadow: 'none',
-            //     },
-            //   },
-            //   ...t.applyStyles('dark', {
-            //     color: '#fff',
-            //   }),
             })}
           />
           <VolumeUpRounded />
