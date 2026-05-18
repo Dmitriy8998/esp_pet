@@ -39,10 +39,6 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
      Serial.print(payload[i]);
    }
    Serial.println();
- 
-   if (!mp3->isRunning()) {
-     mp3->begin(audioBuffer, out);
-   }
  }
  
  else if (type == WStype_CONNECTED) {
