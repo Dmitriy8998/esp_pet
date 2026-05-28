@@ -16,33 +16,118 @@ export default function Stream() {
     }, [])
     
 
-    const handlerButtonClick = async () => {
-        const music = await fetch('/music.mp3')
-        const arrayBuffer = await music.arrayBuffer();
+    // const handlerButtonClick = async () => {
+    //     const music = await fetch('/Otshelnik.mp3')
+    //     const arrayBuffer = await music.arrayBuffer();
         
-        const chunkSize = 2048;
-        let offset = 0;
+    //     const chunkSize = 2048;
+    //     let offset = 0;
 
-        while (offset < arrayBuffer.byteLength) {
-            const chunk = arrayBuffer.slice(offset, offset + chunkSize)
+    //     while (offset < arrayBuffer.byteLength) {
+    //         const chunk = arrayBuffer.slice(offset, offset + chunkSize)
             
-            // for logs
-            // const byteArray = new Uint8Array(chunk);
-            // console.log('byteArray - ', byteArray);
+    //         // for logs
+    //         // const byteArray = new Uint8Array(chunk);
+    //         // console.log('byteArray - ', byteArray);
+
+    //         if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+    //             ws.current.send(chunk);
+    //         } else {
+    //             console.error("esp8266 is disconect!");
+    //             break;
+    //         }
+
+    //         offset += chunkSize;
+
+    //         await new Promise(resolve => setTimeout(resolve, 50));
+    //     }
+    //     console.log("STOP_STREEM!!");
+    // };
+
+
+    // const handlerButtonClick = async () => {
+    //     const music = await fetch('/Otshelnik.mp3')
+    //     const arrayBuffer = await music.arrayBuffer();
+   
+    //     const audioCtx = new AudioContext({
+    //         sampleRate: 10000
+    //     });
+
+    //     const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    //     const float32Samples = audioBuffer.getChannelData(0);
+
+    //     const int32Samples = new Int32Array(float32Samples.length);
+    //     for (let i = 0; i < float32Samples.length; i++) {
+    //         let s = float32Samples[i];
+    //         if (s > 1.0) s = 1.0;
+    //         if (s < -1.0) s = -1.0;
+    //         int32Samples[i] = s < 0 ? s * 0x80000000 : s * 0x7FFFFFFF;
+    //     }
+
+    //     const chunkSize = 512; 
+    //     let offset = 0;
+        
+    //     while (offset < int32Samples.length) {
+    //         const chunk = int32Samples.subarray(offset, offset + chunkSize);
+
+    //         if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+    //             ws.current.send(chunk);
+    //         } else {
+    //             console.error("esp8266 is disconnect!");
+    //             break;
+    //         }
+            
+    //         offset += chunkSize;
+           
+    //         await new Promise(resolve => setTimeout(resolve, 50));
+    //     }
+
+
+        const handlerButtonClick = async () => {
+        const music = await fetch('/Otshelnik.mp3')
+        const arrayBuffer = await music.arrayBuffer();
+
+        const audioCtx = new AudioContext({
+            sampleRate: 10000
+        });
+
+        const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+        const float32Samples = audioBuffer.getChannelData(0);
+
+        const int32Samples = new Int32Array(float32Samples.length);
+        for (let i = 0; i < float32Samples.length; i++) {
+            let s = float32Samples[i];
+            if (s > 1.0) s = 1.0;
+            if (s < -1.0) s = -1.0;
+            
+            
+            let sample16 = s < 0 ? s * 0x8000 : s * 0x7FFF;
+            
+            
+            int32Samples[i] = ((sample16 & 0xFFFF) << 16) | (sample16 & 0xFFFF);
+        }
+
+        const chunkSize = 512; 
+        let offset = 0;
+        
+        while (offset < int32Samples.length) {
+            const chunk = int32Samples.subarray(offset, offset + chunkSize);
 
             if (ws.current && ws.current.readyState === WebSocket.OPEN) {
                 ws.current.send(chunk);
             } else {
-                console.error("esp8266 is disconect!");
+                console.error("esp8266 is disconnect!");
                 break;
             }
-
+            
             offset += chunkSize;
-
-            await new Promise(resolve => setTimeout(resolve, 50));
+        
+            // Рассчитываем точную задержку: 512 сэмплов при 10000 Гц воспроизводятся ~51.2 мс
+            await new Promise(resolve => setTimeout(resolve, 51));
         }
-        console.log("STOP_STREEM!!");
-    };
+    }
+
+
     
     return (
         <Box component="div" sx={{ display: 'flex', flexDirection: 'column' }}>
